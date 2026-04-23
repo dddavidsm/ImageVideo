@@ -1,5 +1,6 @@
+// Archivo: src/SuperVideo.ts
+
 class SuperVideo extends HTMLElement {
-  video: any
   connectedCallback(): void {
     if (this.shadowRoot) return
 
@@ -9,7 +10,7 @@ class SuperVideo extends HTMLElement {
         .player { max-width: 800px; border: 1px solid #ccc; border-radius: 8px; overflow: hidden; }
         video { width: 100%; display: block; background: #000; }
         .controls { display: flex; gap: 8px; align-items: center; padding: 8px; background: #f3f3f3; }
-        .progress { flex: 1; }
+        .progress { flex: 1; cursor: pointer; }
         .time { font-family: monospace; }
       </style>
       <div class="player">
@@ -53,7 +54,6 @@ class SuperVideo extends HTMLElement {
       progressBar.value = percent.toString()
       time.textContent = `${format(video.currentTime)} / ${format(video.duration)}`
       playBtn.textContent = video.paused ? 'Play' : 'Pause'
-
     }
 
     playBtn.addEventListener('click', () => {
@@ -81,26 +81,16 @@ class SuperVideo extends HTMLElement {
       }
     })
 
-  progressBar.addEventListener('input', () => {
+    // Aquí está la barra de progreso optimizada usando solo el evento 'input'
+    progressBar.addEventListener('input', () => {
       if (!Number.isFinite(video.duration) || video.duration <= 0) return
       video.currentTime = (Number(progressBar.value) / 100) * video.duration
     })
-
-    const progresBarParent = progressBar.parentElement as HTMLDivElement
-    progresBarParent.addEventListener('click', (e) => {
-      const totalSize = progresBarParent.offsetWidth
-      const currentPos = e.offsetX
-      const percent = 100 / totalSize * currentPos
-      const currentSeconds = this.video.duration / 100 * percent
-      this.video.currentTime = currentSeconds
-    })  
 
     video.addEventListener('timeupdate', updateTime)
     video.addEventListener('loadedmetadata', updateTime)
     video.addEventListener('play', updateTime)
     video.addEventListener('pause', updateTime)
-    
-   
 
     updateTime()
   }
